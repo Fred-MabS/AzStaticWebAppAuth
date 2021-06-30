@@ -1,0 +1,5 @@
+{
+    "staticWebApps.appSubpath": "svelte-app",
+    "staticWebApps.apiSubpath": "api",
+    "staticWebApps.outputSubpath": "public"
+}
