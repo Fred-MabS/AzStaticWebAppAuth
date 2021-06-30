@@ -1,5 +1,22 @@
 <script>
   import { Link } from 'svelte-routing';
+  import { onMount } from 'svelte';
+
+  let userInfo = undefined;
+  const redirect = window.location.pathname;
+  onMount(async () => (userInfo = await getUserInfo()));
+
+  async function getUserInfo() {
+    try {
+      const response = await fetch('/.auth/me');
+      const payload = await response.json();
+      const { clientPrincipal } = payload;
+      return clientPrincipal;
+    } catch (error) {
+      console.error('No profile could be found');
+      return undefined;
+    }
+  }
 
   function getProps({ href, isPartiallyCurrent, isCurrent }) {
     const isActive = href === '/' ? isCurrent : isPartiallyCurrent || isCurrent;
@@ -20,4 +37,32 @@
       <Link to="/about" {getProps}>About</Link>
     </ul>
   </nav>
+  <!-- Login and logout buttons -->
+  <nav class="menu auth">
+    <p class="menu-label">Auth</p>
+    <div class="menu-list auth">
+      {#if !userInfo}
+          <a
+            href={`/.auth/login/aad?post_login_redirect_uri=${redirect}`}
+          >
+            Microsoft account
+          </a>
+      {/if}
+      {#if userInfo}
+        <a href={`/.auth/logout?post_logout_redirect_uri=${redirect}`}>
+          Logout
+        </a>
+      {/if}
+    </div>
+  </nav>
+  <!-- end of login and logout buttons -->
+  <!-- User infos -->
+  {#if userInfo}
+    <div class="user">
+      <p>Welcome</p>
+      <p>{userInfo && userInfo.userDetails}</p>
+      <p>{userInfo && userInfo.identityProvider}</p>
+    </div>
+  {/if}
+  <!-- End of user infos -->
 </div>
